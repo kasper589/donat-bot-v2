@@ -1,4 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from games import GAMES
 
 
 def donate_menu():
@@ -6,83 +7,59 @@ def donate_menu():
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="💳 Karta orqali",
-                    callback_data="card"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="🪙 USDT orqali",
-                    callback_data="usdt"
+                    text="🎮 O‘yin donati",
+                    callback_data="game_start"
                 )
             ]
         ]
     )
 
 
-def currency_menu():
+def games_menu():
+    buttons = []
+
+    for game_id, game in GAMES.items():
+        buttons.append([
+            InlineKeyboardButton(
+                text=game["name"],
+                callback_data=f"game_{game_id}"
+            )
+        ])
+
+    return InlineKeyboardMarkup(
+        inline_keyboard=buttons
+    )
+
+
+def packages_menu(game_id):
+    buttons = []
+
+    for index, package in enumerate(GAMES[game_id]["packages"]):
+        buttons.append([
+            InlineKeyboardButton(
+                text=f'💎 {package["name"]} - ${package["usd"]}',
+                callback_data=f"package_{game_id}_{index}"
+            )
+        ])
+
+    return InlineKeyboardMarkup(
+        inline_keyboard=buttons
+    )
+
+
+def payment_menu():
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="🇺🇿 UZS",
-                    callback_data="uzs"
+                    text="🇺🇿 Karta (UZS)",
+                    callback_data="payment_uzs"
                 )
             ],
             [
                 InlineKeyboardButton(
                     text="🪙 USDT",
-                    callback_data="usdt_currency"
-                )
-            ]
-        ]
-    )
-
-
-def uzs_amount_menu():
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="50 000 UZS",
-                    callback_data="uzs_50000"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="100 000 UZS",
-                    callback_data="uzs_100000"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="500 000 UZS",
-                    callback_data="uzs_500000"
-                )
-            ]
-        ]
-    )
-
-
-def usdt_amount_menu():
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="10 USDT",
-                    callback_data="usdt_10"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="25 USDT",
-                    callback_data="usdt_25"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="50 USDT",
-                    callback_data="usdt_50"
+                    callback_data="payment_usdt"
                 )
             ]
         ]
@@ -94,8 +71,27 @@ def confirm_menu():
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="✅ Tasdiqladim",
+                    text="📸 Chek yubordim",
                     callback_data="confirm"
+                )
+            ]
+        ]
+    )
+
+
+def admin_menu():
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="📋 Buyurtmalar",
+                    callback_data="admin_orders"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="📊 Statistika",
+                    callback_data="admin_stats"
                 )
             ]
         ]
