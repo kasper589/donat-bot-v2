@@ -128,11 +128,9 @@ async def currency_usdt(callback: CallbackQuery):
     await callback.message.answer(
         "🆔 Free Fire ID yuboring:"
     )
-
     await callback.answer()
     @dp.message()
 async def get_player_id(message: Message):
-
     uid = message.from_user.id
 
     if uid not in user_orders:
