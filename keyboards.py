@@ -20,32 +20,33 @@ def donate_menu():
     )
 
 
-def usdt_amount_menu():
+def confirm_menu():
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="10 USDT",
-                    callback_data="usdt_10"
+                    text="✅ Tasdiqladim",
+                    callback_data="confirm"
                 )
+            ]
+        ]
+    )
+
+
+def usdt_amount_menu():
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="10 USDT", callback_data="usdt_10")
             ],
             [
-                InlineKeyboardButton(
-                    text="25 USDT",
-                    callback_data="usdt_25"
-                )
+                InlineKeyboardButton(text="25 USDT", callback_data="usdt_25")
             ],
             [
-                InlineKeyboardButton(
-                    text="50 USDT",
-                    callback_data="usdt_50"
-                )
+                InlineKeyboardButton(text="50 USDT", callback_data="usdt_50")
             ],
             [
-                InlineKeyboardButton(
-                    text="100 USDT",
-                    callback_data="usdt_100"
-                )
+                InlineKeyboardButton(text="100 USDT", callback_data="usdt_100")
             ]
         ]
     )
