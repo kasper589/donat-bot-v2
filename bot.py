@@ -12,6 +12,7 @@ import keyboards
 logging.basicConfig(level=logging.INFO)
 
 TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
 
 if not TOKEN:
     raise RuntimeError("BOT_TOKEN topilmadi!")
@@ -88,8 +89,7 @@ async def usdt_amount(callback: CallbackQuery):
         "TRC20 manzil:\n"
         "TXXXXXXXXXXXX\n\n"
         "Tarmoq: TRC20\n\n"
-        "📸 Chek yuborish shart!"
-        ,
+        "📸 Chek yuborish shart!",
         reply_markup=keyboards.confirm_menu()
     )
 
@@ -98,9 +98,24 @@ async def usdt_amount(callback: CallbackQuery):
 
 @dp.callback_query(lambda c: c.data == "confirm")
 async def confirm_payment(callback: CallbackQuery):
+    user = callback.from_user
+
+    admin_text = (
+        "🔔 Yangi donat tekshiruvi\n\n"
+        f"👤 Username: @{user.username}\n"
+        f"🆔 ID: {user.id}\n\n"
+        "⏳ Holat: Tekshirish kerak"
+    )
+
+    if ADMIN_ID:
+        await bot.send_message(
+            ADMIN_ID,
+            admin_text
+        )
+
     await callback.message.answer(
         "✅ Tasdiqlash so'rovi yuborildi.\n\n"
-        "Admin tekshirganidan so'ng to'lov tasdiqlanadi."
+        "Admin tekshirganidan so'ng tasdiqlanadi."
     )
 
     await callback.answer()
