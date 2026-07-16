@@ -14,6 +14,8 @@ logging.basicConfig(level=logging.INFO)
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
 
+user_payments = {}
+
 if not TOKEN:
     raise RuntimeError("BOT_TOKEN topilmadi!")
 
@@ -30,52 +32,60 @@ async def start(message: Message):
 
     await message.answer(
         "🎮 Donat botga xush kelibsiz!\n\n"
-        "Buyruqlar:\n"
-        "/donate - donat qilish\n"
-        "/help - yordam"
-    )
-
-
-@dp.message(Command("help"))
-async def help_command(message: Message):
-    await message.answer(
-        "ℹ️ Yordam:\n\n"
-        "/start - boshlash\n"
         "/donate - donat qilish"
-    )
-
-
-@dp.message(Command("admin"))
-async def admin_panel(message: Message):
-    if message.from_user.id != ADMIN_ID:
-        return
-
-    users = await db.get_users_count()
-    donations = await db.get_donations_count()
-
-    await message.answer(
-        f"👨‍💼 Admin panel\n\n"
-        f"👥 Foydalanuvchilar: {users}\n"
-        f"💰 Donatlar: {donations}"
     )
 
 
 @dp.message(Command("donate"))
 async def donate(message: Message):
     await message.answer(
-        "💰 Donat usulini tanlang:",
+        "💰 To'lov usulini tanlang:",
         reply_markup=keyboards.donate_menu()
     )
 
 
 @dp.callback_query(lambda c: c.data == "card")
-async def card_payment(callback: CallbackQuery):
+async def card(callback: CallbackQuery):
     await callback.message.answer(
         "💳 Karta orqali to'lov\n\n"
-        "Karta raqami:\n"
-        "8600 XXXX XXXX XXXX\n\n"
-        "Qabul qiluvchi:\n"
-        "M.Q\n\n"
+        "Valyutani tanlang:",
+        reply_markup=keyboards.currency_menu()
+    )
+    await callback.answer()
+
+
+@dp.callback_query(lambda c: c.data == "uzs")
+async def uzs(callback: CallbackQuery):
+    await callback.message.answer(
+        "🇺🇿 Summani tanlang:",
+        reply_markup=keyboards.uzs_amount_menu()
+    )
+    await callback.answer()
+
+
+@dp.callback_query(lambda c: c.data == "usdt_currency")
+async def usdt(callback: CallbackQuery):
+    await callback.message.answer(
+        "🪙 USDT summani tanlang:",
+        reply_markup=keyboards.usdt_amount_menu()
+    )
+    await callback.answer()
+
+
+@dp.callback_query(lambda c: c.data.startswith("uzs_"))
+async def uzs_amount(callback: CallbackQuery):
+    amount = callback.data.replace("uzs_", "")
+
+    user_payments[callback.from_user.id] = {
+        "amount": amount,
+        "currency": "UZS",
+        "method": "Karta"
+    }
+
+    await callback.message.answer(
+        f"💳 Karta raqami:\n"
+        f"8600 XXXX XXXX XXXX\n\n"
+        f"💰 Summa: {amount} UZS\n\n"
         "📸 Chek yuborish shart!",
         reply_markup=keyboards.confirm_menu()
     )
@@ -83,41 +93,57 @@ async def card_payment(callback: CallbackQuery):
     await callback.answer()
 
 
-@dp.callback_query(lambda c: c.data == "usdt")
-async def usdt_payment(callback: CallbackQuery):
+@dp.callback_query(lambda c: c.data.startswith("usdt_"))
+async def usdt_amount(callback: CallbackQuery):
+    amount = callback.data.replace("usdt_", "")
+
+    user_payments[callback.from_user.id] = {
+        "amount": amount,
+        "currency": "USDT",
+        "method": "USDT TRC20"
+    }
+
     await callback.message.answer(
-        "🪙 USDT TRC20\n\n"
-        "Summani tanlang:",
-        reply_markup=keyboards.usdt_amount_menu()
+        f"🪙 USDT: {amount}\n\n"
+        "Hamyon:\n"
+        "TXXXXXXXXXXXX\n\n"
+        "📸 Chek yuborish shart!",
+        reply_markup=keyboards.confirm_menu()
     )
 
     await callback.answer()
 
 
 @dp.callback_query(lambda c: c.data == "confirm")
-async def confirm_payment(callback: CallbackQuery):
+async def confirm(callback: CallbackQuery):
+    user_id = callback.from_user.id
 
-    user = callback.from_user
+    payment = user_payments.get(user_id)
 
-    # Hozircha namuna summa
+    if not payment:
+        await callback.message.answer(
+            "❌ Avval summa tanlang."
+        )
+        return
+
     await db.add_donation(
-        user.id,
-        0,
-        "unknown"
+        user_id,
+        payment["amount"],
+        payment["currency"],
+        payment["method"]
     )
 
     if ADMIN_ID:
         await bot.send_message(
             ADMIN_ID,
             f"🔔 Yangi donat\n\n"
-            f"👤 User: @{user.username}\n"
-            f"🆔 ID: {user.id}\n"
-            f"⏳ Holat: Tekshirish kerak"
+            f"👤 ID: {user_id}\n"
+            f"💰 {payment['amount']} {payment['currency']}\n"
+            f"💳 {payment['method']}"
         )
 
     await callback.message.answer(
-        "✅ Donat so'rovi saqlandi.\n"
-        "Admin tekshiradi."
+        "✅ Donat saqlandi.\nAdmin tekshiradi."
     )
 
     await callback.answer()
@@ -125,8 +151,6 @@ async def confirm_payment(callback: CallbackQuery):
 
 async def main():
     await db.init_db()
-
-    logging.info("Bot ishga tushdi...")
     await dp.start_polling(bot)
 
 
