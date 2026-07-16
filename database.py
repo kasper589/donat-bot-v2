@@ -25,6 +25,7 @@ async def init_db():
         id INTEGER PRIMARY KEY,
         user_id INTEGER,
         amount REAL,
+        currency TEXT,
         method TEXT,
         status TEXT DEFAULT 'pending'
     )
@@ -47,17 +48,17 @@ async def add_user(user_id, username):
     conn.close()
 
 
-async def add_donation(user_id, amount, method):
+async def add_donation(user_id, amount, currency, method):
     conn = create_connection()
     cursor = conn.cursor()
 
     cursor.execute(
         """
         INSERT INTO donations
-        (user_id, amount, method)
-        VALUES (?, ?, ?)
+        (user_id, amount, currency, method)
+        VALUES (?, ?, ?, ?)
         """,
-        (user_id, amount, method)
+        (user_id, amount, currency, method)
     )
 
     conn.commit()
