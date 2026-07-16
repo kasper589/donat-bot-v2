@@ -16,6 +16,12 @@ dp = Dispatcher()
 
 @dp.message(Command("start"))
 async def start(message: Message):
+    @dp.message(Command("donate"))
+async def donate(message: Message):
+    await message.answer(
+        "💰 Donat qilish uchun summani yuboring.\n\n"
+        "Masalan: 10"
+    )
     await message.answer(
         "🎮 Donat botga xush kelibsiz!\n\n"
         "Bu bot orqali qo'llab-quvvatlash mumkin."
