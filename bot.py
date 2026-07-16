@@ -60,8 +60,11 @@ async def card_payment(callback: CallbackQuery):
         "8600 XXXX XXXX XXXX\n\n"
         "Qabul qiluvchi:\n"
         "M.Q\n\n"
-        "To'lov qilgandan so'ng tasdiqlang."
+        "📸 Chek yuborish shart!\n\n"
+        "To'lov qilgach pastdagi tugmani bosing.",
+        reply_markup=keyboards.confirm_menu()
     )
+
     await callback.answer()
 
 
@@ -72,6 +75,7 @@ async def usdt_payment(callback: CallbackQuery):
         "Summani tanlang:",
         reply_markup=keyboards.usdt_amount_menu()
     )
+
     await callback.answer()
 
 
@@ -83,8 +87,22 @@ async def usdt_amount(callback: CallbackQuery):
         f"🪙 {amount} USDT\n\n"
         "TRC20 manzil:\n"
         "TXXXXXXXXXXXX\n\n"
-        "Tarmoq: TRC20"
+        "Tarmoq: TRC20\n\n"
+        "📸 Chek yuborish shart!"
+        ,
+        reply_markup=keyboards.confirm_menu()
     )
+
+    await callback.answer()
+
+
+@dp.callback_query(lambda c: c.data == "confirm")
+async def confirm_payment(callback: CallbackQuery):
+    await callback.message.answer(
+        "✅ Tasdiqlash so'rovi yuborildi.\n\n"
+        "Admin tekshirganidan so'ng to'lov tasdiqlanadi."
+    )
+
     await callback.answer()
 
 
