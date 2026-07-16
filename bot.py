@@ -4,7 +4,12 @@ import logging
 
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import (
+    Message,
+    CallbackQuery,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
+)
 
 import database as db
 import keyboards
@@ -38,7 +43,6 @@ async def start(message: Message):
 
     await message.answer(
         "🔥 Free Fire Donat bot\n\n"
-        "Buyruqlar:\n"
         "/donate - donat qilish"
     )
 
@@ -63,6 +67,7 @@ async def select_game(callback: CallbackQuery):
     user_orders[callback.from_user.id] = {
         "game": game_id
     }
+
 
     await callback.message.answer(
         "💎 Diamond paketni tanlang:",
@@ -125,14 +130,10 @@ async def currency_usdt(callback: CallbackQuery):
     )
 
     await callback.answer()
-
-
-
-@dp.message()
-async def player_id(message: Message):
+    @dp.message()
+async def get_player_id(message: Message):
 
     uid = message.from_user.id
-
 
     if uid not in user_orders:
         return
@@ -159,7 +160,7 @@ async def payment_card(callback: CallbackQuery):
     await callback.message.answer(
         "💳 Karta orqali to‘lov\n\n"
         "8600 XXXX XXXX XXXX\n\n"
-        "📸 To‘lov chekini yuboring"
+        "📸 Chek rasmini yuboring."
     )
 
 
@@ -177,7 +178,7 @@ async def payment_usdt(callback: CallbackQuery):
         "🪙 USDT TRC20\n\n"
         "Wallet:\n"
         "TXXXXXXXXXXXX\n\n"
-        "📸 Chek yuboring"
+        "📸 Chek rasmini yuboring."
     )
 
 
@@ -186,7 +187,7 @@ async def payment_usdt(callback: CallbackQuery):
 
 
 @dp.message()
-async def save_check(message: Message):
+async def get_check(message: Message):
 
     uid = message.from_user.id
 
@@ -198,7 +199,8 @@ async def save_check(message: Message):
     order = user_orders[uid]
 
 
-    if "player_id" in order:
+    if message.photo:
+
 
         await db.add_order(
             uid,
@@ -206,27 +208,107 @@ async def save_check(message: Message):
             order["package"],
             order["player_id"],
             order["amount"],
-            order.get("currency",""),
-            order.get("method","")
+            order.get("currency", ""),
+            order.get("method", "")
         )
 
 
-        await message.answer(
-            "✅ Buyurtma qabul qilindi.\n"
-            "Admin tekshiradi."
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="✅ Tasdiqlash",
+                        callback_data=f"approve_{uid}"
+                    ),
+                    InlineKeyboardButton(
+                        text="❌ Rad etish",
+                        callback_data=f"reject_{uid}"
+                    )
+                ]
+            ]
         )
 
 
         if ADMIN_ID:
 
-            await bot.send_message(
+            await bot.send_photo(
                 ADMIN_ID,
-                f"🔥 Yangi buyurtma\n\n"
-                f"👤 {uid}\n"
-                f"🎮 {order['game']}\n"
-                f"💎 {order['package']}\n"
-                f"🆔 {order['player_id']}"
+                message.photo[-1].file_id,
+                caption=(
+                    "🔥 Yangi buyurtma\n\n"
+                    f"👤 User: {uid}\n"
+                    f"🎮 O‘yin: {order['game']}\n"
+                    f"💎 Paket: {order['package']}\n"
+                    f"🆔 ID: {order['player_id']}\n"
+                    f"💰 ${order['amount']}"
+                ),
+                reply_markup=keyboard
             )
+
+
+        await message.answer(
+            "✅ Chek qabul qilindi.\n"
+            "Admin tekshiradi."
+        )
+
+
+    else:
+
+        await message.answer(
+            "📸 Iltimos, chek rasmini yuboring."
+        )
+
+
+
+@dp.callback_query(lambda c: c.data.startswith("approve_"))
+async def approve(callback: CallbackQuery):
+
+    uid = int(
+        callback.data.replace(
+            "approve_",
+            ""
+        )
+    )
+
+
+    await bot.send_message(
+        uid,
+        "✅ To‘lov tasdiqlandi!"
+    )
+
+
+    await callback.message.edit_caption(
+        caption="✅ Buyurtma tasdiqlandi."
+    )
+
+
+    await callback.answer()
+
+
+
+@dp.callback_query(lambda c: c.data.startswith("reject_"))
+async def reject(callback: CallbackQuery):
+
+    uid = int(
+        callback.data.replace(
+            "reject_",
+            ""
+        )
+    )
+
+
+    await bot.send_message(
+        uid,
+        "❌ To‘lov rad etildi."
+    )
+
+
+    await callback.message.edit_caption(
+        caption="❌ Buyurtma rad etildi."
+    )
+
+
+    await callback.answer()
 
 
 
