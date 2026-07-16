@@ -20,13 +20,44 @@ def donate_menu():
     )
 
 
-def confirm_menu():
+def currency_menu():
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="✅ Tasdiqladim",
-                    callback_data="confirm"
+                    text="🇺🇿 UZS",
+                    callback_data="uzs"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="🪙 USDT",
+                    callback_data="usdt_currency"
+                )
+            ]
+        ]
+    )
+
+
+def uzs_amount_menu():
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="50 000 UZS",
+                    callback_data="uzs_50000"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="100 000 UZS",
+                    callback_data="uzs_100000"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="500 000 UZS",
+                    callback_data="uzs_500000"
                 )
             ]
         ]
@@ -53,28 +84,18 @@ def usdt_amount_menu():
                     text="50 USDT",
                     callback_data="usdt_50"
                 )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="100 USDT",
-                    callback_data="usdt_100"
-                )
             ]
         ]
     )
 
 
-def admin_confirm_menu():
+def confirm_menu():
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="✅ Tasdiqlash",
-                    callback_data="admin_ok"
-                ),
-                InlineKeyboardButton(
-                    text="❌ Rad etish",
-                    callback_data="admin_no"
+                    text="✅ Tasdiqladim",
+                    callback_data="confirm"
                 )
             ]
         ]
