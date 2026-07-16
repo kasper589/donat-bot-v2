@@ -63,8 +63,15 @@ async def donate(message: Message):
     )
 
 
-@dp.callback_query(lambda c: c.data.startswith("game_"))
-async def select_game(callback: CallbackQuery):
+@dp.callback_query(lambda c: c.data == "choose_game")
+async def choose_game(callback: CallbackQuery):
+
+    await callback.message.answer(
+        "🎮 O‘yinni tanlang:",
+        reply_markup=keyboards.games_menu()
+    )
+
+    await callback.answer()
 
     game_id = callback.data.replace(
         "game_",
