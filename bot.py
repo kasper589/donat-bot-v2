@@ -79,6 +79,7 @@ async def card_payment(callback: CallbackQuery):
         "📸 Chek yuborish shart!",
         reply_markup=keyboards.confirm_menu()
     )
+
     await callback.answer()
 
 
@@ -89,21 +90,34 @@ async def usdt_payment(callback: CallbackQuery):
         "Summani tanlang:",
         reply_markup=keyboards.usdt_amount_menu()
     )
+
     await callback.answer()
 
 
 @dp.callback_query(lambda c: c.data == "confirm")
 async def confirm_payment(callback: CallbackQuery):
+
+    user = callback.from_user
+
+    # Hozircha namuna summa
+    await db.add_donation(
+        user.id,
+        0,
+        "unknown"
+    )
+
     if ADMIN_ID:
         await bot.send_message(
             ADMIN_ID,
-            f"🔔 Yangi tekshiruv\n\n"
-            f"👤 User: @{callback.from_user.username}\n"
-            f"🆔 ID: {callback.from_user.id}"
+            f"🔔 Yangi donat\n\n"
+            f"👤 User: @{user.username}\n"
+            f"🆔 ID: {user.id}\n"
+            f"⏳ Holat: Tekshirish kerak"
         )
 
     await callback.message.answer(
-        "✅ So'rov yuborildi."
+        "✅ Donat so'rovi saqlandi.\n"
+        "Admin tekshiradi."
     )
 
     await callback.answer()
@@ -111,6 +125,7 @@ async def confirm_payment(callback: CallbackQuery):
 
 async def main():
     await db.init_db()
+
     logging.info("Bot ishga tushdi...")
     await dp.start_polling(bot)
 
