@@ -45,6 +45,21 @@ async def help_command(message: Message):
     )
 
 
+@dp.message(Command("admin"))
+async def admin_panel(message: Message):
+    if message.from_user.id != ADMIN_ID:
+        return
+
+    users = await db.get_users_count()
+    donations = await db.get_donations_count()
+
+    await message.answer(
+        f"👨‍💼 Admin panel\n\n"
+        f"👥 Foydalanuvchilar: {users}\n"
+        f"💰 Donatlar: {donations}"
+    )
+
+
 @dp.message(Command("donate"))
 async def donate(message: Message):
     await message.answer(
@@ -61,11 +76,9 @@ async def card_payment(callback: CallbackQuery):
         "8600 XXXX XXXX XXXX\n\n"
         "Qabul qiluvchi:\n"
         "M.Q\n\n"
-        "📸 Chek yuborish shart!\n\n"
-        "To'lov qilgach pastdagi tugmani bosing.",
+        "📸 Chek yuborish shart!",
         reply_markup=keyboards.confirm_menu()
     )
-
     await callback.answer()
 
 
@@ -76,75 +89,28 @@ async def usdt_payment(callback: CallbackQuery):
         "Summani tanlang:",
         reply_markup=keyboards.usdt_amount_menu()
     )
-
-    await callback.answer()
-
-
-@dp.callback_query(lambda c: c.data.startswith("usdt_"))
-async def usdt_amount(callback: CallbackQuery):
-    amount = callback.data.replace("usdt_", "")
-
-    await callback.message.answer(
-        f"🪙 {amount} USDT\n\n"
-        "TRC20 manzil:\n"
-        "TXXXXXXXXXXXX\n\n"
-        "📸 Chek yuborish shart!",
-        reply_markup=keyboards.confirm_menu()
-    )
-
     await callback.answer()
 
 
 @dp.callback_query(lambda c: c.data == "confirm")
 async def confirm_payment(callback: CallbackQuery):
-    user = callback.from_user
-
     if ADMIN_ID:
         await bot.send_message(
             ADMIN_ID,
-            f"🔔 Yangi donat tekshiruvi\n\n"
-            f"👤 Username: @{user.username}\n"
-            f"🆔 ID: {user.id}\n\n"
-            f"⏳ Holat: Tekshirish kerak",
-            reply_markup=keyboards.admin_confirm_menu()
+            f"🔔 Yangi tekshiruv\n\n"
+            f"👤 User: @{callback.from_user.username}\n"
+            f"🆔 ID: {callback.from_user.id}"
         )
 
     await callback.message.answer(
-        "✅ So'rov yuborildi.\n"
-        "Admin tekshiradi."
+        "✅ So'rov yuborildi."
     )
 
     await callback.answer()
-
-
-@dp.callback_query(lambda c: c.data == "admin_ok")
-async def admin_ok(callback: CallbackQuery):
-    await callback.message.answer(
-        "✅ Donat tasdiqlandi."
-    )
-
-    await callback.answer()
-
-
-@dp.callback_query(lambda c: c.data == "admin_no")
-async def admin_no(callback: CallbackQuery):
-    await callback.message.answer(
-        "❌ Donat rad etildi."
-    )
-
-    await callback.answer()
-
-
-@dp.message()
-async def other(message: Message):
-    await message.answer(
-        "Xabaringiz qabul qilindi ✅"
-    )
 
 
 async def main():
     await db.init_db()
-
     logging.info("Bot ishga tushdi...")
     await dp.start_polling(bot)
 
