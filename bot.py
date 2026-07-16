@@ -88,7 +88,6 @@ async def usdt_amount(callback: CallbackQuery):
         f"🪙 {amount} USDT\n\n"
         "TRC20 manzil:\n"
         "TXXXXXXXXXXXX\n\n"
-        "Tarmoq: TRC20\n\n"
         "📸 Chek yuborish shart!",
         reply_markup=keyboards.confirm_menu()
     )
@@ -100,22 +99,37 @@ async def usdt_amount(callback: CallbackQuery):
 async def confirm_payment(callback: CallbackQuery):
     user = callback.from_user
 
-    admin_text = (
-        "🔔 Yangi donat tekshiruvi\n\n"
-        f"👤 Username: @{user.username}\n"
-        f"🆔 ID: {user.id}\n\n"
-        "⏳ Holat: Tekshirish kerak"
-    )
-
     if ADMIN_ID:
         await bot.send_message(
             ADMIN_ID,
-            admin_text
+            f"🔔 Yangi donat tekshiruvi\n\n"
+            f"👤 Username: @{user.username}\n"
+            f"🆔 ID: {user.id}\n\n"
+            f"⏳ Holat: Tekshirish kerak",
+            reply_markup=keyboards.admin_confirm_menu()
         )
 
     await callback.message.answer(
-        "✅ Tasdiqlash so'rovi yuborildi.\n\n"
-        "Admin tekshirganidan so'ng tasdiqlanadi."
+        "✅ So'rov yuborildi.\n"
+        "Admin tekshiradi."
+    )
+
+    await callback.answer()
+
+
+@dp.callback_query(lambda c: c.data == "admin_ok")
+async def admin_ok(callback: CallbackQuery):
+    await callback.message.answer(
+        "✅ Donat tasdiqlandi."
+    )
+
+    await callback.answer()
+
+
+@dp.callback_query(lambda c: c.data == "admin_no")
+async def admin_no(callback: CallbackQuery):
+    await callback.message.answer(
+        "❌ Donat rad etildi."
     )
 
     await callback.answer()
