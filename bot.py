@@ -4,9 +4,10 @@ import logging
 
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
 import database as db
+import keyboards
 
 logging.basicConfig(level=logging.INFO)
 
@@ -46,13 +47,49 @@ async def help_command(message: Message):
 @dp.message(Command("donate"))
 async def donate(message: Message):
     await message.answer(
-        "💰 Donat qilish uchun summani yuboring.\n\n"
-        "Masalan: 10"
+        "💰 Donat usulini tanlang:",
+        reply_markup=keyboards.donate_menu()
     )
 
 
+@dp.callback_query(lambda c: c.data == "card")
+async def card_payment(callback: CallbackQuery):
+    await callback.message.answer(
+        "💳 Karta orqali to'lov\n\n"
+        "Karta raqami:\n"
+        "8600 XXXX XXXX XXXX\n\n"
+        "Qabul qiluvchi:\n"
+        "M.Q\n\n"
+        "To'lov qilgandan so'ng tasdiqlang."
+    )
+    await callback.answer()
+
+
+@dp.callback_query(lambda c: c.data == "usdt")
+async def usdt_payment(callback: CallbackQuery):
+    await callback.message.answer(
+        "🪙 USDT TRC20\n\n"
+        "Summani tanlang:",
+        reply_markup=keyboards.usdt_amount_menu()
+    )
+    await callback.answer()
+
+
+@dp.callback_query(lambda c: c.data.startswith("usdt_"))
+async def usdt_amount(callback: CallbackQuery):
+    amount = callback.data.replace("usdt_", "")
+
+    await callback.message.answer(
+        f"🪙 {amount} USDT\n\n"
+        "TRC20 manzil:\n"
+        "TXXXXXXXXXXXX\n\n"
+        "Tarmoq: TRC20"
+    )
+    await callback.answer()
+
+
 @dp.message()
-async def save_message(message: Message):
+async def other(message: Message):
     await message.answer(
         "Xabaringiz qabul qilindi ✅"
     )
