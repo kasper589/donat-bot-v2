@@ -37,7 +37,7 @@ def packages_menu(game_id):
     for index, package in enumerate(GAMES[game_id]["packages"]):
         buttons.append([
             InlineKeyboardButton(
-                text=f'💎 {package["name"]} - ${package["usd"]}',
+                text=f"💎 {package['name']}",
                 callback_data=f"package_{game_id}_{index}"
             )
         ])
@@ -47,18 +47,37 @@ def packages_menu(game_id):
     )
 
 
-def payment_menu():
+def currency_menu():
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="🇺🇿 Karta (UZS)",
-                    callback_data="payment_uzs"
+                    text="🇺🇿 UZS (So'm)",
+                    callback_data="currency_uzs"
                 )
             ],
             [
                 InlineKeyboardButton(
                     text="🪙 USDT",
+                    callback_data="currency_usdt"
+                )
+            ]
+        ]
+    )
+
+
+def payment_menu():
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="💳 Karta orqali",
+                    callback_data="payment_card"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="🪙 USDT orqali",
                     callback_data="payment_usdt"
                 )
             ]
@@ -71,27 +90,8 @@ def confirm_menu():
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="📸 Chek yubordim",
+                    text="📸 Chek yubordim ✅",
                     callback_data="confirm"
-                )
-            ]
-        ]
-    )
-
-
-def admin_menu():
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="📋 Buyurtmalar",
-                    callback_data="admin_orders"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="📊 Statistika",
-                    callback_data="admin_stats"
                 )
             ]
         ]
