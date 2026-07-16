@@ -8,7 +8,7 @@ def donate_menu():
             [
                 InlineKeyboardButton(
                     text="🎮 O‘yin donati",
-                    callback_data="game_start"
+                    callback_data="choose_game"
                 )
             ]
         ]
