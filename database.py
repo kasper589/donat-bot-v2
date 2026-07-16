@@ -63,16 +63,24 @@ async def add_donation(user_id, amount, message):
     conn.close()
 
 
-async def get_user(user_id):
+async def get_users_count():
     conn = create_connection()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT user_id FROM users WHERE user_id = ?",
-        (user_id,)
-    )
+    cursor.execute("SELECT COUNT(*) FROM users")
+    result = cursor.fetchone()[0]
 
-    result = cursor.fetchone()
+    conn.close()
+
+    return result
+
+
+async def get_donations_count():
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM donations")
+    result = cursor.fetchone()[0]
 
     conn.close()
 
