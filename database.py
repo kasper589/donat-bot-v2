@@ -1,5 +1,4 @@
 import sqlite3
-import asyncio
 
 
 DB_NAME = "donat.db"
@@ -62,3 +61,19 @@ async def add_donation(user_id, amount, message):
 
     conn.commit()
     conn.close()
+
+
+async def get_user(user_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT user_id FROM users WHERE user_id = ?",
+        (user_id,)
+    )
+
+    result = cursor.fetchone()
+
+    conn.close()
+
+    return result
