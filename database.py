@@ -21,9 +21,12 @@ async def init_db():
     """)
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS donations (
+    CREATE TABLE IF NOT EXISTS orders (
         id INTEGER PRIMARY KEY,
         user_id INTEGER,
+        game TEXT,
+        package TEXT,
+        player_id TEXT,
         amount REAL,
         currency TEXT,
         method TEXT,
@@ -40,7 +43,11 @@ async def add_user(user_id, username):
     cursor = conn.cursor()
 
     cursor.execute(
-        "INSERT OR IGNORE INTO users (user_id, username) VALUES (?, ?)",
+        """
+        INSERT OR IGNORE INTO users
+        (user_id, username)
+        VALUES (?, ?)
+        """,
         (user_id, username)
     )
 
@@ -48,17 +55,41 @@ async def add_user(user_id, username):
     conn.close()
 
 
-async def add_donation(user_id, amount, currency, method):
+async def add_order(
+    user_id,
+    game,
+    package,
+    player_id,
+    amount,
+    currency,
+    method
+):
     conn = create_connection()
     cursor = conn.cursor()
 
     cursor.execute(
         """
-        INSERT INTO donations
-        (user_id, amount, currency, method)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO orders
+        (
+            user_id,
+            game,
+            package,
+            player_id,
+            amount,
+            currency,
+            method
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        (user_id, amount, currency, method)
+        (
+            user_id,
+            game,
+            package,
+            player_id,
+            amount,
+            currency,
+            method
+        )
     )
 
     conn.commit()
@@ -69,19 +100,27 @@ async def get_users_count():
     conn = create_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT COUNT(*) FROM users")
+    cursor.execute(
+        "SELECT COUNT(*) FROM users"
+    )
+
     result = cursor.fetchone()[0]
 
     conn.close()
+
     return result
 
 
-async def get_donations_count():
+async def get_orders_count():
     conn = create_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT COUNT(*) FROM donations")
+    cursor.execute(
+        "SELECT COUNT(*) FROM orders"
+    )
+
     result = cursor.fetchone()[0]
 
     conn.close()
+
     return result
